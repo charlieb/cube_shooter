@@ -178,3 +178,10 @@ void mrotz(float r, mat m) {
 	m[1][0] = sin(r);
 	m[1][1] = cos(r);
 }
+
+void mscl(vec v, mat m) {
+	mid(m);
+	m[0][0] = v[0];
+	m[1][1] = v[1];
+	m[2][2] = v[2];
+}

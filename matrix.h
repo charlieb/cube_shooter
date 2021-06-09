@@ -18,8 +18,6 @@ void mtrans(vec v, mat m);
 void mrotx(float r, mat m);
 void mroty(float r, mat m);
 void mrotz(float r, mat m);
-
-
-
+void mscl(vec v, mat m);
 
 #endif

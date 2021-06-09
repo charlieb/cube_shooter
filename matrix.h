@@ -15,6 +15,8 @@ void mvmul(mat m, vec v, vec res);
 
 void mid(mat m);
 void mtrans(vec v, mat m);
+void mrotx(float r, mat m);
+void mroty(float r, mat m);
 void mrotz(float r, mat m);
 
 

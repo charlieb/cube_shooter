@@ -149,12 +149,30 @@ void mid(mat m) {
 }
 
 void mtrans(vec v, mat m) {
+	mid(m);
 	m[3][0] = v[0];
 	m[3][1] = v[1];
 	m[3][2] = v[2];
 }
 
+void mrotx(float r, mat m) {
+	mid(m);
+	m[1][1] = cos(r);
+	m[1][2] = -sin(r);
+	m[2][1] = sin(r);
+	m[2][2] = cos(r);
+}
+
+void mroty(float r, mat m) {
+	mid(m);
+	m[0][0] = cos(r);
+	m[0][2] = -sin(r);
+	m[2][0] = sin(r);
+	m[2][2] = cos(r);
+}
+
 void mrotz(float r, mat m) {
+	mid(m);
 	m[0][0] = cos(r);
 	m[0][1] = -sin(r);
 	m[1][0] = sin(r);

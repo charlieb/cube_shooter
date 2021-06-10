@@ -1,11 +1,11 @@
 CC=gcc
-CFLAGS=-std=c17 -pedantic -Wall
+CFLAGS=-std=c17 -pedantic -Wall -fPIC
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 DEST=.
 NAME=cubes
 INCLUDES= -I/usr/include/lua5.3 `sdl2-config --cflags`
-LIBS= -llua5.3 -lm `sdl2-config --libs` -lSDL2_gfx
+LIBS= -llua -lm `sdl2-config --libs` -lSDL2_gfx
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

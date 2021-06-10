@@ -10,6 +10,6 @@ local shape = {npts=4; pts={{ 0,  0, 0,1},
 															  3,4,
 															  4,1}};
 local cshape = cubes.make_shape(shape);
-print(cshape);
-cubes.print_shape(cshape);
+local cmrz = cubes.make_mat_rotz(0.7);
+cubes.shape_transform(cmrz, cshape);
 cubes.show_shape(cshape);

@@ -11,5 +11,6 @@ typedef struct {
 } shape;
 
 void print_shape(shape *s);
+void stransform(shape *s, mat m);
 
 #endif

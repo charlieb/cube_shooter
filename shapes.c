@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 shape *alloc_shape(int npts, int nlines) {
 	shape *s = malloc(sizeof(shape));
@@ -25,6 +26,14 @@ shape *alloc_shapes(int nshapes, int npts, int nlines) {
 	}
 
 	return s;
+}
+
+void stransform(shape *s, mat m) {
+	vec res;
+	for(int i = 0; i < s->npts; i++) {
+		mvmul(m, s->pts[i], res);
+		memcpy(s->pts[i], res, sizeof(vec));
+	}
 }
 
 void print_shape(shape *s) {

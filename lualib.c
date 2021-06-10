@@ -57,8 +57,6 @@ static int lua_make_shape(lua_State *L) {
 	if(!lua_istable(L,-1))
 		luaL_error(L, "lua_make_shape, didn't find a table\n");
 
-	//shape *s = (shape*)lua_newuserdata(L, sizeof(shape));
-	//lua_pop(L);
 	shape *s = malloc(sizeof(shape));
 
 	lua_pushstring(L, "npts");
@@ -123,10 +121,87 @@ static int lua_show_shape(lua_State *L) {
 	return 0;
 }
 
+static int lua_make_trans_mat(lua_State *L) {
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_trans_matrix, didn't find a table\n");
+
+	mat *m = malloc(sizeof(mat));
+	vec v;
+	lua_get_vec(L, v);
+	mtrans(v, *m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
+static int lua_make_scl_mat(lua_State *L) {
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_scl_matrix, didn't find a table\n");
+
+	mat *m = malloc(sizeof(mat));
+	vec v;
+	lua_get_vec(L, v);
+	mscl(v, *m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
+static int lua_make_rotx_mat(lua_State *L) {
+	if(!lua_isnumber(L,-1))
+		luaL_error(L, "lua_make_rotx_matrix, didn't find a number\n");
+
+	mat *m = malloc(sizeof(mat));
+	mrotx(lua_tonumber(L, -1), *m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
+static int lua_make_roty_mat(lua_State *L) {
+	if(!lua_isnumber(L,-1))
+		luaL_error(L, "lua_make_roty_matrix, didn't find a number\n");
+
+	mat *m = malloc(sizeof(mat));
+	mroty(lua_tonumber(L, -1), *m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
+static int lua_make_rotz_mat(lua_State *L) {
+	if(!lua_isnumber(L,-1))
+		luaL_error(L, "lua_make_rotz_matrix, didn't find a number\n");
+
+	mat *m = malloc(sizeof(mat));
+	mrotz(lua_tonumber(L, -1), *m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
+static int lua_stransform(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	mat *m = (mat *)lua_touserdata(L,-2);
+
+	print_shape(s);
+	stransform(s, *m);
+	print_shape(s);
+	return 0;
+}
+
+
 static const struct luaL_Reg mylib[] = {
 	{"make_shape", lua_make_shape},
 	{"print_shape", lua_print_shape},
 	{"show_shape", lua_show_shape},
+	{"make_mat_rotx", lua_make_rotx_mat},
+	{"make_mat_roty", lua_make_roty_mat},
+	{"make_mat_rotz", lua_make_rotz_mat},
+	{"make_mat_trans", lua_make_trans_mat},
+	{"make_mat_scl", lua_make_scl_mat},
+	{"shape_transform", lua_stransform},
+
 	{NULL, NULL}
 	};
 

@@ -121,6 +121,14 @@ static int lua_show_shape(lua_State *L) {
 	return 0;
 }
 
+static int lua_make_id_mat(lua_State *L) {
+	mat *m = malloc(sizeof(mat));
+	mid(*m);
+
+	lua_pushlightuserdata(L, (void*)m);
+	return 1;
+}
+
 static int lua_make_trans_mat(lua_State *L) {
 	if(!lua_istable(L,-1))
 		luaL_error(L, "lua_make_trans_matrix, didn't find a table\n");
@@ -180,6 +188,16 @@ static int lua_make_rotz_mat(lua_State *L) {
 	return 1;
 }
 
+static int lua_mmul(lua_State *L) {
+	mat *m1 = (mat *)lua_touserdata(L,-1);
+	mat *m2 = (mat *)lua_touserdata(L,-2);
+	mat *m3 = (mat *)lua_touserdata(L,-3);
+
+	mmul(*m1,*m2,*m3);
+	return 0;
+	
+}
+
 static int lua_stransform(lua_State *L) {
 	shape *s = (shape *)lua_touserdata(L,-1);
 	mat *m = (mat *)lua_touserdata(L,-2);
@@ -195,11 +213,13 @@ static const struct luaL_Reg mylib[] = {
 	{"make_shape", lua_make_shape},
 	{"print_shape", lua_print_shape},
 	{"show_shape", lua_show_shape},
+	{"make_mat_id", lua_make_id_mat},
 	{"make_mat_rotx", lua_make_rotx_mat},
 	{"make_mat_roty", lua_make_roty_mat},
 	{"make_mat_rotz", lua_make_rotz_mat},
 	{"make_mat_trans", lua_make_trans_mat},
 	{"make_mat_scl", lua_make_scl_mat},
+	{"make_mat_mul", lua_mmul},
 	{"shape_transform", lua_stransform},
 
 	{NULL, NULL}

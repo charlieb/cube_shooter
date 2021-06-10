@@ -17,7 +17,7 @@ lib: $(OBJECTS)
 	$(CC) $(CFLAGS) $(LIBS) $(OBJECTS) -shared -fPIC  -o $(DEST)/$(NAME).so
 
 debug: CFLAGS += -g
-debug: exe
+debug: lib
 
 profile_NOX: CFLAGS += -pg
 profile_NOX: NOX

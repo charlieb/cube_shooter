@@ -1,10 +1,13 @@
 #include "shapes.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 shape *alloc_shape(int npts, int nlines) {
 	shape *s = malloc(sizeof(shape));
+	s->npts = npts;
 	s->pts = malloc(npts * sizeof(vec));
+	s->nlines = nlines;
 	s->lines = malloc(nlines * sizeof(int));
 	return s;
 }
@@ -15,9 +18,36 @@ shape *alloc_shapes(int nshapes, int npts, int nlines) {
 	int *lines = malloc(nshapes * nlines * sizeof(int));
 
 	for(int i = 0; i < nshapes; i++) {
+		s[i].npts = npts;
 		s[i].pts = pts + i * npts;
+		s[i].nlines = nlines;
 		s[i].lines = lines + i * nlines;
 	}
 
 	return s;
+}
+
+void print_shape(shape *s) {
+	printf("Shape: npts: %i, nlines: %i\n", s->npts, s->nlines);
+	for(int i = 0; i < s->npts; i++)
+		printf("%4f, %4f, %4f, %4f\n", 
+				s->pts[i][0],
+				s->pts[i][1],
+				s->pts[i][2],
+				s->pts[i][3]);
+	for(int i = 0; i < s->nlines; i+=2)
+		printf("%i, %i\n", s->lines[i], s->lines[i+1]);
+
+
+	for(int i = 0; i < s->nlines; i+=2)
+		printf("%4f, %4f, %4f, %4f -> %4f, %4f, %4f, %4f\n", 
+				s->pts[s->lines[i]][0],
+				s->pts[s->lines[i]][1],
+				s->pts[s->lines[i]][2],
+				s->pts[s->lines[i]][3],
+				s->pts[s->lines[i+1]][0],
+				s->pts[s->lines[i+1]][1],
+				s->pts[s->lines[i+1]][2],
+				s->pts[s->lines[i+1]][3]
+				);
 }

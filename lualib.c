@@ -56,33 +56,68 @@ static int lua_make_shape(lua_State *L) {
 	if(!lua_istable(L,-1))
 		luaL_error(L, "lua_make_shape, didn't find a table\n");
 
-	shape s;
+	//shape *s = (shape*)lua_newuserdata(L, sizeof(shape));
+	//lua_pop(L);
+	shape *s = malloc(sizeof(shape));
 
-	dumpstack(L);
 	lua_pushstring(L, "npts");
 	lua_gettable(L, -2);
-	int npts = lua_tonumber(L, -1);
-	printf("npts: %i\n", npts);
+	s->npts = lua_tonumber(L, -1);
+	printf("npts: %i\n", s->npts);
 	lua_pop(L, 1);
-	s.pts = malloc(npts * sizeof(vec));
+	s->pts = malloc(s->npts * sizeof(vec));
 	
-	dumpstack(L);
 	lua_pushstring(L, "pts");
 	lua_gettable(L, -2);
 	if(!lua_istable(L,-1))
 		luaL_error(L, "lua_make_shape, didn't find a table for pts\n");
-	for(int i = 0; i < npts; i++) {
+	for(int i = 0; i < s->npts; i++) {
 		lua_pushnumber(L, i+1);
 		lua_gettable(L, -2);
-		lua_get_vec(L, s.pts[i]);
-		vprint(s.pts[i]);
+		lua_get_vec(L, s->pts[i]);
+		vprint(s->pts[i]);
+		printf("-----\n");
 		lua_pop(L, 1);
 	}
+	lua_pop(L,1); // Pop the pts table
+
+	lua_pushstring(L, "nlines");
+	lua_gettable(L, -2);
+	s->nlines = lua_tonumber(L, -1);
+	printf("nlines: %i\n", s->nlines);
+	lua_pop(L, 1);
+	s->lines = malloc(s->nlines * sizeof(int)*2);
+	
+	lua_pushstring(L, "lines");
+	lua_gettable(L, -2);
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_shape, didn't find a table for lines\n");
+	for(int i = 0; i < s->nlines*2; i++) {
+		lua_pushnumber(L, i+1);
+		s->lines[i] = lua_tonumber(L, -1) -1; //Lua indexes from 1
+		lua_pop(L, 1);
+	}
+	lua_pop(L,1); // Pop the line table
+
+	lua_pop(L,1); // Pop the shape table
+
+	print_shape(s);
+	printf("%p\n", (void *)s);
+	lua_pushlightuserdata(L, (void*)s);
+	dumpstack(L);
+
+	return 1;
+}
+
+static int lua_print_shape(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	print_shape(s);
 	return 0;
 }
 
 static const struct luaL_Reg mylib[] = {
 	{"make_shape", lua_make_shape},
+	{"print_shape", lua_print_shape},
 	{NULL, NULL}
 	};
 

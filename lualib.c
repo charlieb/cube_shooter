@@ -6,6 +6,7 @@
 
 #include "matrix.h"
 #include "shapes.h"
+#include "draw.h"
 
 static void dumpstack (lua_State *L) {
   int top=lua_gettop(L);
@@ -94,6 +95,7 @@ static int lua_make_shape(lua_State *L) {
 		luaL_error(L, "lua_make_shape, didn't find a table for lines\n");
 	for(int i = 0; i < s->nlines*2; i++) {
 		lua_pushnumber(L, i+1);
+		lua_gettable(L, -2);
 		s->lines[i] = lua_tonumber(L, -1) -1; //Lua indexes from 1
 		lua_pop(L, 1);
 	}
@@ -115,9 +117,16 @@ static int lua_print_shape(lua_State *L) {
 	return 0;
 }
 
+static int lua_show_shape(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	show_shape(s);
+	return 0;
+}
+
 static const struct luaL_Reg mylib[] = {
 	{"make_shape", lua_make_shape},
 	{"print_shape", lua_print_shape},
+	{"show_shape", lua_show_shape},
 	{NULL, NULL}
 	};
 

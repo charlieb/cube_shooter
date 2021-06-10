@@ -35,19 +35,19 @@ void print_shape(shape *s) {
 				s->pts[i][1],
 				s->pts[i][2],
 				s->pts[i][3]);
-	for(int i = 0; i < s->nlines; i+=2)
-		printf("%i, %i\n", s->lines[i], s->lines[i+1]);
+	for(int i = 0; i < s->nlines; i++)
+		printf("%i, %i\n", s->lines[i*2], s->lines[i*2+1]);
 
 
-	for(int i = 0; i < s->nlines; i+=2)
+	for(int i = 0; i < s->nlines; i++)
 		printf("%4f, %4f, %4f, %4f -> %4f, %4f, %4f, %4f\n", 
-				s->pts[s->lines[i]][0],
-				s->pts[s->lines[i]][1],
-				s->pts[s->lines[i]][2],
-				s->pts[s->lines[i]][3],
-				s->pts[s->lines[i+1]][0],
-				s->pts[s->lines[i+1]][1],
-				s->pts[s->lines[i+1]][2],
-				s->pts[s->lines[i+1]][3]
+				s->pts[s->lines[i*2]][0],
+				s->pts[s->lines[i*2]][1],
+				s->pts[s->lines[i*2]][2],
+				s->pts[s->lines[i*2]][3],
+				s->pts[s->lines[i*2+1]][0],
+				s->pts[s->lines[i*2+1]][1],
+				s->pts[s->lines[i*2+1]][2],
+				s->pts[s->lines[i*2+1]][3]
 				);
 }

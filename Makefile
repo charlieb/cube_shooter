@@ -3,7 +3,7 @@ CFLAGS=-std=c17 -pedantic -Wall
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 DEST=.
-EXE=cube_shooter
+NAME=cubes
 INCLUDES= -I/usr/include/lua5.3 #`sdl2-config --cflags`
 LIBS= -llua5.3 -lm # `sdl2-config --libs` -lSDL2_gfx
 
@@ -11,7 +11,10 @@ LIBS= -llua5.3 -lm # `sdl2-config --libs` -lSDL2_gfx
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 exe: $(OBJECTS)
-	$(CC) $(CFLAGS) $(LIBS) $(OBJECTS) -o $(DEST)/$(EXE)
+	$(CC) $(CFLAGS) $(LIBS) $(OBJECTS) -o $(DEST)/$(NAME)
+
+lib: $(OBJECTS)
+	$(CC) $(CFLAGS) $(LIBS) $(OBJECTS) -shared -fPIC  -o $(DEST)/$(NAME).so
 
 debug: CFLAGS += -g
 debug: exe

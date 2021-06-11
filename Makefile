@@ -5,7 +5,7 @@ OBJECTS=$(SOURCES:.c=.o)
 DEST=.
 NAME=cubes
 INCLUDES= -I/usr/include/lua5.3 `sdl2-config --cflags`
-LIBS= -llua -lm `sdl2-config --libs` -lSDL2_gfx
+LIBS= -llua5.3 -lm `sdl2-config --libs` -lSDL2_gfx
 
 .c.o:
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@

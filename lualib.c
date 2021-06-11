@@ -200,12 +200,12 @@ static int lua_make_param(lua_State *L, param *p) {
 
 	lua_pushnumber(L, 1);
 	lua_gettable(L, -2);
-	p->loc[1] = lua_tonumber(L, -1);
+	p->loc[0] = lua_tonumber(L, -1);
 	lua_pop(L, 1);
 
 	lua_pushnumber(L, 2);
 	lua_gettable(L, -2);
-	p->loc[2] = lua_tonumber(L, -1);
+	p->loc[1] = lua_tonumber(L, -1);
 	lua_pop(L, 1);
 
 	lua_pop(L, 1); // loc
@@ -216,6 +216,15 @@ static int lua_make_param(lua_State *L, param *p) {
 	lua_pop(L, 1);
 
 	p->values = malloc(p->nvalues * sizeof(float));
+	lua_pushstring(L, "values");
+	lua_gettable(L, -2);
+	for(int i = 0; i < p->nvalues; i++) {
+		lua_pushnumber(L, i+1);
+		lua_gettable(L, -2);
+		p->values[i] = lua_tonumber(L, -1);
+		lua_pop(L, 1);
+	}
+	lua_pop(L,1); // vals
 	return 0;
 }
 
@@ -233,9 +242,12 @@ static int lua_make_params(lua_State *L) {
 	lua_pushstring(L, "nparams");
 	lua_gettable(L, -2);
 	p->nparams = lua_tonumber(L, -1);
-	lua_pop(L , -1);
+	lua_pop(L , 1);
 
 	p->params = malloc(p->nparams * sizeof(param));
+
+	lua_pushstring(L, "params");
+	lua_gettable(L, -2);
 	for(int i = 0; i < p->nparams; i++) {
 		lua_pushnumber(L, i+1);
 		lua_gettable(L, -2);

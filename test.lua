@@ -40,15 +40,29 @@ local cshape = cubes.make_shape(cube);
 --cubes.print_shape(cshape);
 local m = cubes.make_mat_id();
 cubes.mat_scl(m, {100, 100, 100, 1});
-cubes.mat_print(m);
-print("-------------\n");
+--cubes.mat_print(m);
+--print("-------------\n");
 --cubes.mat_rotx(m, 0.5);
 cubes.mat_rotz(m, 0.7);
 cubes.mat_roty(m, 0.7);
 --cubes.mat_print(m);
 cubes.shape_transform(m, cshape);
-print("-------------\n");
-cubes.print_shape(cshape);
+--print("-------------\n");
+--cubes.print_shape(cshape);
 
-cubes.show_shape(cshape);
+--cubes.show_shape(cshape);
+
+local mp = cubes.make_mat_id();
+local p = {
+	base=mp;
+	nparams=1;
+	params= {{
+		loc={3,5},
+		nvalues=17;
+		values={1,2,3,4,5,6,7,8,9,8,7,6,5,4,3,2,1}}}};
+
+local cp = cubes.make_params(p);
+
+
+
 

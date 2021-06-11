@@ -11,14 +11,14 @@ local shape = {npts=4; pts={{ 0,  0, 0,1},
 							  4,1}};
 
 local cube = {npts=8; pts={
-	{0,0,0,1},
-	{0,1,0,1},
-	{1,1,0,1},
-	{1,0,0,1},
-	{0,0,1,1},
-	{0,1,1,1},
-	{1,1,1,1},
-	{1,0,1,1}};
+	{-0.5,-0.5,-0.5,1},
+	{-0.5, 0.5,-0.5,1},
+	{ 0.5, 0.5,-0.5,1},
+	{ 0.5,-0.5,-0.5,1},
+	{-0.5,-0.5, 0.5,1},
+	{-0.5, 0.5, 0.5,1},
+	{ 0.5, 0.5, 0.5,1},
+	{ 0.5,-0.5, 0.5,1}};
 	nlines=12;
 	lines = {
 		1,2,
@@ -37,10 +37,18 @@ local cube = {npts=8; pts={
 		4,8}};
 
 local cshape = cubes.make_shape(cube);
-local cmrz = cubes.make_mat_rotz(0.7);
-cubes.shape_transform(cmrz, cshape);
-local cmrx = cubes.make_mat_rotx(1.7);
-cubes.shape_transform(cmrx, cshape);
-local cmscl = cubes.make_mat_scl({100,100,100,1});
-cubes.shape_transform(cmscl, cshape);
+--cubes.print_shape(cshape);
+local m = cubes.make_mat_id();
+cubes.mat_scl(m, {100, 100, 100, 1});
+cubes.mat_print(m);
+print("-------------\n");
+--cubes.mat_rotx(m, 0.5);
+cubes.mat_rotz(m, 0.7);
+cubes.mat_roty(m, 0.7);
+--cubes.mat_print(m);
+cubes.shape_transform(m, cshape);
+print("-------------\n");
+cubes.print_shape(cshape);
+
 cubes.show_shape(cshape);
+

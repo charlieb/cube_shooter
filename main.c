@@ -58,12 +58,19 @@ void test() {
 	mprint(m3);
 	printf("----------\n");
 
+	printf("trans\n");
 	vec v1 = {2,3,4,1};
 	mtrans(v1, m1);
 	mprint(m1);
 	printf("----------\n");
+	
+	printf("scl\n");
+	vec v2 = {1,10,100,1};
+	mscl(v2, m2);
+	mprint(m2);
+	printf("----------\n");
 
-	mmul(m1, m2, m3);
+	mmul(m2, m1, m3);
 	mprint(m3);
 	printf("----------\n");
 

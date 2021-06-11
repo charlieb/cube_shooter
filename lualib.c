@@ -7,6 +7,7 @@
 
 #include "matrix.h"
 #include "shapes.h"
+#include "param_trans.h"
 #include "draw.h"
 
 static void dumpstack (lua_State *L) {
@@ -193,6 +194,61 @@ static int lua_stransform(lua_State *L) {
 	return 0;
 }
 
+static int lua_make_param(lua_State *L, param *p) {
+	lua_pushstring(L, "loc");
+	lua_gettable(L, -2);
+
+	lua_pushnumber(L, 1);
+	lua_gettable(L, -2);
+	p->loc[1] = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	lua_pushnumber(L, 2);
+	lua_gettable(L, -2);
+	p->loc[2] = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	lua_pop(L, 1); // loc
+
+	lua_pushstring(L, "nvalues");
+	lua_gettable(L, -2);
+	p->nvalues = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+
+	p->values = malloc(p->nvalues * sizeof(float));
+	return 0;
+}
+
+static int lua_make_params(lua_State *L) {
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_shape, didn't find a table\n");
+
+	params *p = malloc(sizeof(params));
+
+	lua_pushstring(L, "base");
+	lua_gettable(L, -2);
+	memcpy(p->base, lua_touserdata(L, -1), sizeof(mat));
+	lua_pop(L, 1);
+	
+	lua_pushstring(L, "nparams");
+	lua_gettable(L, -2);
+	p->nparams = lua_tonumber(L, -1);
+	lua_pop(L , -1);
+
+	p->params = malloc(p->nparams * sizeof(param));
+	for(int i = 0; i < p->nparams; i++) {
+		lua_pushnumber(L, i+1);
+		lua_gettable(L, -2);
+		lua_make_param(L, &p->params[i]);
+		lua_pop(L, 1);
+	}
+	lua_pop(L,1); // params
+
+	lua_pushlightuserdata(L, (void*)p);
+
+	return 1;
+}
+
 
 static const struct luaL_Reg mylib[] = {
 	{"make_shape", lua_make_shape},
@@ -207,6 +263,8 @@ static const struct luaL_Reg mylib[] = {
 	{"mat_mul", lua_mmul},
 	{"mat_print", lua_mat_print},
 	{"shape_transform", lua_stransform},
+	{"make_params", lua_make_params},
+
 
 	{NULL, NULL}
 	};

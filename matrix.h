@@ -20,4 +20,18 @@ void mroty(float r, mat m);
 void mrotz(float r, mat m);
 void mscl(vec v, mat m);
 
+// Number of matrices to allocate when we run out of space
+#define MATSTACK_CHUNK 5
+typedef struct {
+	int nmats;
+	mat *mats;
+	int nmats_alloced;
+} matstack;
+
+void msprint(matstack *ms);
+void mspush(matstack *ms, mat m);
+void mspop(matstack *ms, mat res);
+void msclear(matstack *ms);
+void mscalc(matstack *ms, mat m);
+
 #endif

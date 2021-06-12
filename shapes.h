@@ -8,6 +8,7 @@ typedef struct {
 	vec *pts;
 	int nlines;
 	int *lines;
+	mat *mstack;
 } shape;
 
 void print_shape(shape *s);

@@ -7,7 +7,6 @@
 
 #include "matrix.h"
 #include "shapes.h"
-#include "param_trans.h"
 #include "draw.h"
 
 static void dumpstack (lua_State *L) {
@@ -123,6 +122,12 @@ static int lua_make_id_mat(lua_State *L) {
 	return 1;
 }
 
+static int lua_set_id_mat(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	mid(*m);
+	return 0;
+}
+
 static int lua_trans_mat(lua_State *L) {
 	if(!lua_istable(L,-1))
 		luaL_error(L, "lua_make_trans_matrix, didn't find a table\n");
@@ -186,79 +191,54 @@ static int lua_mat_print(lua_State *L) {
 	return 0;
 }
 
+static int lua_make_matstack(lua_State *L) {
+	matstack *ms = malloc(sizeof(matstack));
+	memset(ms, 0, sizeof(matstack));
+
+	lua_pushlightuserdata(L, (void*)ms);
+	return 1;
+}
+
+static int lua_matstack_push(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	matstack *ms = (matstack *)lua_touserdata(L,-2);
+	mspush(ms, *m);
+	return 0;
+}
+
+static int lua_matstack_pop(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	matstack *ms = (matstack *)lua_touserdata(L,-2);
+	mspop(ms, *m);
+	return 0;
+}
+
+static int lua_matstack_calc(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	matstack *ms = (matstack *)lua_touserdata(L,-2);
+	mscalc(ms, *m);
+	return 0;
+}
+
+static int lua_matstack_clear(lua_State *L) {
+	matstack *ms = (matstack *)lua_touserdata(L,-1);
+	msclear(ms);
+	return 0;
+}
+
+static int lua_matstack_print(lua_State *L) {
+	matstack *ms = (matstack *)lua_touserdata(L,-1);
+
+	msprint(ms);
+	return 0;
+}
+
 static int lua_stransform(lua_State *L) {
-	shape *s = (shape *)lua_touserdata(L,-1);
-	mat *m = (mat *)lua_touserdata(L,-2);
+	mat *m = (mat *)lua_touserdata(L,-1);
+	shape *s = (shape *)lua_touserdata(L,-2);
 
 	stransform(s, *m);
 	return 0;
-}
-
-static int lua_make_param(lua_State *L, param *p) {
-	lua_pushstring(L, "loc");
-	lua_gettable(L, -2);
-
-	lua_pushnumber(L, 1);
-	lua_gettable(L, -2);
-	p->loc[0] = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-
-	lua_pushnumber(L, 2);
-	lua_gettable(L, -2);
-	p->loc[1] = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-
-	lua_pop(L, 1); // loc
-
-	lua_pushstring(L, "nvalues");
-	lua_gettable(L, -2);
-	p->nvalues = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-
-	p->values = malloc(p->nvalues * sizeof(float));
-	lua_pushstring(L, "values");
-	lua_gettable(L, -2);
-	for(int i = 0; i < p->nvalues; i++) {
-		lua_pushnumber(L, i+1);
-		lua_gettable(L, -2);
-		p->values[i] = lua_tonumber(L, -1);
-		lua_pop(L, 1);
-	}
-	lua_pop(L,1); // vals
-	return 0;
-}
-
-static int lua_make_params(lua_State *L) {
-	if(!lua_istable(L,-1))
-		luaL_error(L, "lua_make_shape, didn't find a table\n");
-
-	params *p = malloc(sizeof(params));
-
-	lua_pushstring(L, "base");
-	lua_gettable(L, -2);
-	memcpy(p->base, lua_touserdata(L, -1), sizeof(mat));
-	lua_pop(L, 1);
-	
-	lua_pushstring(L, "nparams");
-	lua_gettable(L, -2);
-	p->nparams = lua_tonumber(L, -1);
-	lua_pop(L , 1);
-
-	p->params = malloc(p->nparams * sizeof(param));
-
-	lua_pushstring(L, "params");
-	lua_gettable(L, -2);
-	for(int i = 0; i < p->nparams; i++) {
-		lua_pushnumber(L, i+1);
-		lua_gettable(L, -2);
-		lua_make_param(L, &p->params[i]);
-		lua_pop(L, 1);
-	}
-	lua_pop(L,1); // params
-
-	lua_pushlightuserdata(L, (void*)p);
-
-	return 1;
 }
 
 
@@ -267,6 +247,7 @@ static const struct luaL_Reg mylib[] = {
 	{"print_shape", lua_print_shape},
 	{"show_shape", lua_show_shape},
 	{"make_mat_id", lua_make_id_mat},
+	{"mat_set_id", lua_set_id_mat},
 	{"mat_rotx", lua_rotx_mat},
 	{"mat_roty", lua_roty_mat},
 	{"mat_rotz", lua_rotz_mat},
@@ -274,14 +255,20 @@ static const struct luaL_Reg mylib[] = {
 	{"mat_scl", lua_scl_mat},
 	{"mat_mul", lua_mmul},
 	{"mat_print", lua_mat_print},
+	{"make_matstack", lua_make_matstack},
+	{"matstack_push", lua_matstack_push},
+	{"matstack_pop", lua_matstack_pop },
+	{"matstack_clear", lua_matstack_clear},
+	{"matstack_calc", lua_matstack_calc},
+	{"matstack_print", lua_matstack_print},
 	{"shape_transform", lua_stransform},
-	{"make_params", lua_make_params},
-
 
 	{NULL, NULL}
 	};
 
+// Used when the .so library is loaded from lua
 int luaopen_cubes(lua_State *L) {
 	luaL_newlib(L, mylib);
 	return 1;
 }
+

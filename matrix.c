@@ -1,6 +1,7 @@
 #include "matrix.h"
 
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
 
@@ -185,3 +186,45 @@ void mscl(vec v, mat m) {
 	m[1][1] = v[1];
 	m[2][2] = v[2];
 }
+
+void msprint(matstack *ms) {
+	printf("nmats: %i, nmats_alloced: %i\n", 
+			ms->nmats, ms->nmats_alloced);
+	for(int i = 0; i < ms->nmats; i++) {
+		mprint(ms->mats[i]);
+		printf("-----------\n");
+	}
+}
+void mspush(matstack *ms, mat m) {
+	if(ms->nmats == ms->nmats_alloced) {
+		ms->nmats_alloced += MATSTACK_CHUNK;
+		ms->mats = realloc(ms->mats, ms->nmats_alloced * sizeof(mat));
+	}
+	memcpy(ms->mats[ms->nmats], m, sizeof(mat));
+	ms->nmats++;
+}
+void mspop(matstack *ms, mat res) {
+	memcpy(res, ms->mats[--ms->nmats], sizeof(mat));
+}
+
+void msclear(matstack *ms) {
+	ms->nmats = 0;
+}
+void mscalc(matstack *ms, mat res) {
+	mat tmp[2];
+	mid(tmp[0]); mid(tmp[1]);
+	for(int i = 0; i < ms->nmats; i++) {
+		printf("=============\n");
+		mprint(tmp[0]);
+		printf("-------------\n");
+		mprint(tmp[1]);
+		printf("-------------\n");
+		mmul(tmp[i%2], ms->mats[i], tmp[(i+1)%2]);
+		mprint(tmp[0]);
+		printf("-------------\n");
+		mprint(tmp[1]);
+		printf("=============\n");
+	}
+	memcpy(res, tmp[(ms->nmats)%2], sizeof(mat));
+}
+

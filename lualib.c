@@ -216,10 +216,6 @@ static int lua_make_shape(lua_State *L) {
 	}
 	lua_pop(L,1); // Pop the pts table
 
-	// Populate the originals table
-	s->orig_pts = malloc(s->npts * sizeof(vec));
-	memcpy(s->orig_pts, s->pts, s->npts * sizeof(vec));
-
 	lua_pushstring(L, "nlines");
 	lua_gettable(L, -2);
 	s->nlines = lua_tonumber(L, -1);
@@ -250,17 +246,6 @@ static int lua_print_shape(lua_State *L) {
 	return 0;
 }
 
-static int lua_show_shape(lua_State *L) {
-	mat m;
-	shape *s = (shape *)lua_touserdata(L,-1);
-
-	memcpy(s->pts, s->orig_pts, s->npts * sizeof(vec));
-	mscalc(&s->ms, m);
-	stransform(s, m);
-	show_shape(s);
-	return 0;
-}
-
 static int lua_stransform(lua_State *L) {
 	mat *m = (mat *)lua_touserdata(L,-1);
 	shape *s = (shape *)lua_touserdata(L,-2);
@@ -269,12 +254,33 @@ static int lua_stransform(lua_State *L) {
 	return 0;
 }
 
-static int lua_shape_matstack(lua_State *L) {
-	shape *s = (shape *)lua_touserdata(L,-1);
-	lua_pushlightuserdata(L, &s->ms);
+/************ FIXTURE **************/
+
+static int lua_fixture_matstack(lua_State *L) {
+	fixture *f = (fixture *)lua_touserdata(L,-1);
+	lua_pushlightuserdata(L, &f->ms);
 	return 1;
 }
 
+static int lua_make_fixture(lua_State *L) {
+	fixture *f = malloc(sizeof(fixture));
+	memset(f, 0, sizeof(fixture));
+	lua_pushlightuserdata(L, (void *)f);
+	return 1;
+}
+
+static int lua_fixture_set_shape(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	fixture *f = (fixture *)lua_touserdata(L,-2);
+	f->s = s;
+	return 0;
+}
+
+static int lua_fixture_show(lua_State *L) {
+	fixture *f = (fixture *)lua_touserdata(L,-1);
+	fixture_render(f);
+	return 0;
+}
 
 static const struct luaL_Reg mylib[] = {
 	{"make_mat_id", lua_make_id_mat},
@@ -298,9 +304,11 @@ static const struct luaL_Reg mylib[] = {
 
 	{"make_shape", lua_make_shape},
 	{"print_shape", lua_print_shape},
-	{"show_shape", lua_show_shape},
 	{"shape_transform", lua_stransform},
-	{"shape_matstack", lua_shape_matstack},
+	{"make_fixture", lua_make_fixture},
+	{"fixture_matstack", lua_fixture_matstack},
+	{"fixture_set_shape", lua_fixture_set_shape},
+	{"fixture_show", lua_fixture_show},
 
 	{NULL, NULL}
 	};

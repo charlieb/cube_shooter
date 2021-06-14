@@ -80,8 +80,9 @@ local cube = {npts=8; pts={
 
 local cshape = cubes.make_shape(cube);
 local csms = cubes.shape_matstack(cshape);
+local s = 100;
 cubes.mat_set_id(m);
-cubes.mat_scl(m, {100, 100, 100, 1});
+cubes.mat_scl(m, {s, s, s, 1});
 cubes.matstack_push(csms, m);
 
 cubes.mat_set_id(m);
@@ -94,12 +95,22 @@ cubes.mat_roty(m, ry);
 cubes.matstack_push(csms, m);
 --cubes.mat_print(m);
 
+local si = -1;
 local quit = false
 while not quit do
-	ry = ry + 0.05;
+	ry = ry + 0.01;
 	cubes.mat_set_id(m);
 	cubes.mat_roty(m, ry);
 	cubes.matstack_poke(csms, 2, m);
+
+	if s > 100 or s < 20 then
+		si = -si;
+	end 
+	s = s + si;
+	cubes.mat_set_id(m);
+	cubes.mat_scl(m, {s,s,s,1});
+	cubes.matstack_poke(csms, 0, m);
+
 	quit = cubes.show_shape(cshape)
 end 
 

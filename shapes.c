@@ -60,3 +60,24 @@ void print_shape(shape *s) {
 				s->pts[s->lines[i*2+1]][3]
 				);
 }
+
+void fpush(fixture *f, fixture *kid) {
+	if(f->nkids == f->nkids_alloced) {
+		f->nkids_alloced += FIXTURE_CHUNK;
+		f->kids = realloc(f->kids, f->nkids_alloced * sizeof(fixture*));
+	}
+	f->kids[f->nkids] = kid;
+	f->nkids++;
+}
+
+struct fixture_render {
+	vec *pts;
+	int *lines;
+};
+
+void falloc_render(fixture *f, struct fixture_render **fr) {
+
+}
+
+void fixture_show(fixture *f) {
+}

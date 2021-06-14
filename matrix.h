@@ -34,4 +34,9 @@ void mspop(matstack *ms, mat res);
 void msclear(matstack *ms);
 void mscalc(matstack *ms, mat m);
 
+void mspeek(matstack *ms, int n, mat m);
+void mspoke(matstack *ms, int n, mat m);
+
+
+
 #endif

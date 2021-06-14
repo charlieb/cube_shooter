@@ -5,10 +5,11 @@
 
 typedef struct {
 	int npts;
+	vec *orig_pts; // TODO pull this out into a seperate protoype shape
 	vec *pts;
 	int nlines;
 	int *lines;
-	mat *mstack;
+	matstack ms;
 } shape;
 
 void print_shape(shape *s);

@@ -54,66 +54,6 @@ static void lua_get_vec(lua_State *L, vec v) {
 	}
 }
 
-static int lua_make_shape(lua_State *L) {
-	if(!lua_istable(L,-1))
-		luaL_error(L, "lua_make_shape, didn't find a table\n");
-
-	shape *s = malloc(sizeof(shape));
-
-	lua_pushstring(L, "npts");
-	lua_gettable(L, -2);
-	s->npts = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	s->pts = malloc(s->npts * sizeof(vec));
-	
-	lua_pushstring(L, "pts");
-	lua_gettable(L, -2);
-	if(!lua_istable(L,-1))
-		luaL_error(L, "lua_make_shape, didn't find a table for pts\n");
-	for(int i = 0; i < s->npts; i++) {
-		lua_pushnumber(L, i+1);
-		lua_gettable(L, -2);
-		lua_get_vec(L, s->pts[i]);
-		lua_pop(L, 1);
-	}
-	lua_pop(L,1); // Pop the pts table
-
-	lua_pushstring(L, "nlines");
-	lua_gettable(L, -2);
-	s->nlines = lua_tonumber(L, -1);
-	lua_pop(L, 1);
-	s->lines = malloc(s->nlines * sizeof(int)*2);
-	
-	lua_pushstring(L, "lines");
-	lua_gettable(L, -2);
-	if(!lua_istable(L,-1))
-		luaL_error(L, "lua_make_shape, didn't find a table for lines\n");
-	for(int i = 0; i < s->nlines*2; i++) {
-		lua_pushnumber(L, i+1);
-		lua_gettable(L, -2);
-		s->lines[i] = lua_tonumber(L, -1) -1; //Lua indexes from 1
-		lua_pop(L, 1);
-	}
-	lua_pop(L,1); // Pop the line table
-	lua_pop(L,1); // Pop the shape table
-
-	lua_pushlightuserdata(L, (void*)s);
-
-	return 1;
-}
-
-static int lua_print_shape(lua_State *L) {
-	shape *s = (shape *)lua_touserdata(L,-1);
-	print_shape(s);
-	return 0;
-}
-
-static int lua_show_shape(lua_State *L) {
-	shape *s = (shape *)lua_touserdata(L,-1);
-	show_shape(s);
-	return 0;
-}
-
 static int lua_make_id_mat(lua_State *L) {
 	mat *m = malloc(sizeof(mat));
 	mid(*m);
@@ -226,10 +166,98 @@ static int lua_matstack_clear(lua_State *L) {
 	return 0;
 }
 
+static int lua_matstack_poke(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	int n = lua_tonumber(L,-2);
+	matstack *ms = (matstack *)lua_touserdata(L,-3);
+	mspoke(ms, n, *m);
+	return 0;
+}
+
+static int lua_matstack_peek(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	int n = lua_tonumber(L,-2);
+	matstack *ms = (matstack *)lua_touserdata(L,-3);
+	mspeek(ms, n, *m);
+	return 0;
+}
+
 static int lua_matstack_print(lua_State *L) {
 	matstack *ms = (matstack *)lua_touserdata(L,-1);
 
 	msprint(ms);
+	return 0;
+}
+
+/************ SHAPES *****************/
+
+static int lua_make_shape(lua_State *L) {
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_shape, didn't find a table\n");
+
+	shape *s = malloc(sizeof(shape));
+	memset(s, 0, sizeof(shape));
+
+	lua_pushstring(L, "npts");
+	lua_gettable(L, -2);
+	s->npts = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	s->pts = malloc(s->npts * sizeof(vec));
+	
+	lua_pushstring(L, "pts");
+	lua_gettable(L, -2);
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_shape, didn't find a table for pts\n");
+	for(int i = 0; i < s->npts; i++) {
+		lua_pushnumber(L, i+1);
+		lua_gettable(L, -2);
+		lua_get_vec(L, s->pts[i]);
+		lua_pop(L, 1);
+	}
+	lua_pop(L,1); // Pop the pts table
+
+	// Populate the originals table
+	s->orig_pts = malloc(s->npts * sizeof(vec));
+	memcpy(s->orig_pts, s->pts, s->npts * sizeof(vec));
+
+	lua_pushstring(L, "nlines");
+	lua_gettable(L, -2);
+	s->nlines = lua_tonumber(L, -1);
+	lua_pop(L, 1);
+	s->lines = malloc(s->nlines * sizeof(int)*2);
+	
+	lua_pushstring(L, "lines");
+	lua_gettable(L, -2);
+	if(!lua_istable(L,-1))
+		luaL_error(L, "lua_make_shape, didn't find a table for lines\n");
+	for(int i = 0; i < s->nlines*2; i++) {
+		lua_pushnumber(L, i+1);
+		lua_gettable(L, -2);
+		s->lines[i] = lua_tonumber(L, -1) -1; //Lua indexes from 1
+		lua_pop(L, 1);
+	}
+	lua_pop(L,1); // Pop the line table
+	lua_pop(L,1); // Pop the shape table
+
+	lua_pushlightuserdata(L, (void*)s);
+
+	return 1;
+}
+
+static int lua_print_shape(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	print_shape(s);
+	return 0;
+}
+
+static int lua_show_shape(lua_State *L) {
+	mat m;
+	shape *s = (shape *)lua_touserdata(L,-1);
+
+	memcpy(s->pts, s->orig_pts, s->npts * sizeof(vec));
+	mscalc(&s->ms, m);
+	stransform(s, m);
+	show_shape(s);
 	return 0;
 }
 
@@ -241,11 +269,14 @@ static int lua_stransform(lua_State *L) {
 	return 0;
 }
 
+static int lua_shape_matstack(lua_State *L) {
+	shape *s = (shape *)lua_touserdata(L,-1);
+	lua_pushlightuserdata(L, &s->ms);
+	return 1;
+}
+
 
 static const struct luaL_Reg mylib[] = {
-	{"make_shape", lua_make_shape},
-	{"print_shape", lua_print_shape},
-	{"show_shape", lua_show_shape},
 	{"make_mat_id", lua_make_id_mat},
 	{"mat_set_id", lua_set_id_mat},
 	{"mat_rotx", lua_rotx_mat},
@@ -255,13 +286,21 @@ static const struct luaL_Reg mylib[] = {
 	{"mat_scl", lua_scl_mat},
 	{"mat_mul", lua_mmul},
 	{"mat_print", lua_mat_print},
+
 	{"make_matstack", lua_make_matstack},
 	{"matstack_push", lua_matstack_push},
 	{"matstack_pop", lua_matstack_pop },
 	{"matstack_clear", lua_matstack_clear},
+	{"matstack_poke", lua_matstack_poke},
+	{"matstack_peek", lua_matstack_peek},
 	{"matstack_calc", lua_matstack_calc},
 	{"matstack_print", lua_matstack_print},
+
+	{"make_shape", lua_make_shape},
+	{"print_shape", lua_print_shape},
+	{"show_shape", lua_show_shape},
 	{"shape_transform", lua_stransform},
+	{"shape_matstack", lua_shape_matstack},
 
 	{NULL, NULL}
 	};

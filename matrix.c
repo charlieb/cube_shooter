@@ -204,6 +204,7 @@ void mspush(matstack *ms, mat m) {
 	ms->nmats++;
 }
 void mspop(matstack *ms, mat res) {
+	if(ms->nmats <= 0) return;
 	memcpy(res, ms->mats[--ms->nmats], sizeof(mat));
 }
 
@@ -213,18 +214,16 @@ void msclear(matstack *ms) {
 void mscalc(matstack *ms, mat res) {
 	mat tmp[2];
 	mid(tmp[0]); mid(tmp[1]);
-	for(int i = 0; i < ms->nmats; i++) {
-		printf("=============\n");
-		mprint(tmp[0]);
-		printf("-------------\n");
-		mprint(tmp[1]);
-		printf("-------------\n");
-		mmul(tmp[i%2], ms->mats[i], tmp[(i+1)%2]);
-		mprint(tmp[0]);
-		printf("-------------\n");
-		mprint(tmp[1]);
-		printf("=============\n");
-	}
+	for(int i = 0; i < ms->nmats; i++)
+		mmul(ms->mats[i], tmp[i%2], tmp[(i+1)%2]);
 	memcpy(res, tmp[(ms->nmats)%2], sizeof(mat));
 }
 
+void mspeek(matstack *ms, int n, mat m) {
+	if(n >= ms->nmats) return;
+	memcpy(m, ms->mats[n], sizeof(mat));
+}
+void mspoke(matstack *ms, int n, mat m) {
+	if(n >= ms->nmats) return;
+	memcpy(ms->mats[n], m, sizeof(mat));
+}

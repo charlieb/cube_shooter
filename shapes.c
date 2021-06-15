@@ -4,30 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-shape *alloc_shape(int npts, int nlines) {
-	shape *s = malloc(sizeof(shape));
-	s->npts = npts;
-	s->pts = malloc(npts * sizeof(vec));
-	s->nlines = nlines;
-	s->lines = malloc(nlines * sizeof(int));
-	return s;
-}
-
-shape *alloc_shapes(int nshapes, int npts, int nlines) {
-	shape *s = malloc(nshapes * sizeof(shape));
-	vec *pts = malloc(nshapes * npts * sizeof(vec));
-	int *lines = malloc(nshapes * nlines * sizeof(int));
-
-	for(int i = 0; i < nshapes; i++) {
-		s[i].npts = npts;
-		s[i].pts = pts + i * npts;
-		s[i].nlines = nlines;
-		s[i].lines = lines + i * nlines;
-	}
-
-	return s;
-}
-
 void stransform(shape *s, mat m) {
 	vec res;
 	for(int i = 0; i < s->npts; i++) {
@@ -37,27 +13,27 @@ void stransform(shape *s, mat m) {
 }
 
 void print_shape(shape *s) {
-	printf("Shape: npts: %i, nlines: %i\n", s->npts, s->nlines);
+	printf("Shape: npts: %i, nlines: %i\n", s->npts, s->proto->nlines);
 	for(int i = 0; i < s->npts; i++)
 		printf("%4f, %4f, %4f, %4f\n", 
 				s->pts[i][0],
 				s->pts[i][1],
 				s->pts[i][2],
 				s->pts[i][3]);
-	for(int i = 0; i < s->nlines; i++)
-		printf("%i, %i\n", s->lines[i*2], s->lines[i*2+1]);
+	for(int i = 0; i < s->proto->nlines; i++)
+		printf("%i, %i\n", s->proto->lines[i*2], s->proto->lines[i*2+1]);
 
 
-	for(int i = 0; i < s->nlines; i++)
+	for(int i = 0; i < s->proto->nlines; i++)
 		printf("%4f, %4f, %4f, %4f -> %4f, %4f, %4f, %4f\n", 
-				s->pts[s->lines[i*2]][0],
-				s->pts[s->lines[i*2]][1],
-				s->pts[s->lines[i*2]][2],
-				s->pts[s->lines[i*2]][3],
-				s->pts[s->lines[i*2+1]][0],
-				s->pts[s->lines[i*2+1]][1],
-				s->pts[s->lines[i*2+1]][2],
-				s->pts[s->lines[i*2+1]][3]
+				s->pts[s->proto->lines[i*2]][0],
+				s->pts[s->proto->lines[i*2]][1],
+				s->pts[s->proto->lines[i*2]][2],
+				s->pts[s->proto->lines[i*2]][3],
+				s->pts[s->proto->lines[i*2+1]][0],
+				s->pts[s->proto->lines[i*2+1]][1],
+				s->pts[s->proto->lines[i*2+1]][2],
+				s->pts[s->proto->lines[i*2+1]][3]
 				);
 }
 
@@ -69,14 +45,48 @@ void fpush(fixture *f, fixture *kid) {
 	f->kids[f->nkids] = kid;
 	f->nkids++;
 }
+/*
+typedef struct sfixture {
+	mat m;
+	matstack ms;
+	shape *s;
+	int nkids;
+	int nkids_alloced;
+	struct sfixture **kids;
+} fixture;
+*/
 
-struct fixture_render {
-	vec *pts;
-	int *lines;
-};
+void frender(fixture *fix) {
+	const int todo_block_size = 10;
+	int todo_size = todo_block_size;
+	/* TODO maybe static this to avoid allocations */
+	fixture **todo = malloc(todo_size * sizeof(fixture*));
+	int head = 0;
 
-void falloc_render(fixture *f, struct fixture_render **fr) {
+	mscalc(&fix->ms, fix->m);
+	fixture *f = fix, *k;
+	mat tmp;
 
+	while(head >= 0) {
+		/*make sure there's enough space for the kids*/
+		while(head + f->nkids >= todo_size) {
+			todo_size += todo_block_size;
+			todo = realloc(todo, todo_size * sizeof(fixture*));
+		}
+		/*add the kids and calc them at the same time*/
+		for(int i = 0; i < f->nkids; i++) {
+			k = f->kids[i];
+			mscalc(&k->ms, k->m);
+			mmul(f->m, k->m, tmp); // may need to reverse this
+			memcpy(k->m, tmp, sizeof(mat));
+
+			todo[head+i] = k;
+		}
+		head += f->nkids -1; // point to the last child
+		/*pop the last child and process its children in the next iteration*/
+		f = todo[head--];
+	}
+	free(todo);
 }
 
 void fixture_show(fixture *f) {

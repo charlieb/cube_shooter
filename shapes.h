@@ -22,6 +22,7 @@ typedef struct sfixture {
 	mat m;
 	matstack ms;
 	shape *s;
+	struct sfixture *parent;
 	int nkids;
 	int nkids_alloced;
 	struct sfixture **kids;

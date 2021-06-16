@@ -38,6 +38,8 @@ void print_shape(shape *s) {
 }
 
 void fpush(fixture *f, fixture *kid) {
+	kid->parent = f;
+
 	if(f->nkids == f->nkids_alloced) {
 		f->nkids_alloced += FIXTURE_CHUNK;
 		f->kids = realloc(f->kids, f->nkids_alloced * sizeof(fixture*));
@@ -50,13 +52,14 @@ typedef struct sfixture {
 	mat m;
 	matstack ms;
 	shape *s;
+	struct sfixture *parent;
 	int nkids;
 	int nkids_alloced;
 	struct sfixture **kids;
 } fixture;
 */
 
-void frender(fixture *fix) {
+void fcalcm(fixture *fix) {
 	const int todo_block_size = 10;
 	int todo_size = todo_block_size;
 	/* TODO maybe static this to avoid allocations */
@@ -89,5 +92,57 @@ void frender(fixture *fix) {
 	free(todo);
 }
 
+/* gives back a list where items earlier in the list are 
+ * gaurenteed to be closer to the root node of the tree.
+ * This allows us to recalculate all the fixtures in order
+ * and ensure that parents are calculated before the 
+ * children that depend on them.
+ * */
+static void fcollect(fixture *fix, int *nfixtures, fixture ***list) {
+	const int block_size = 10;
+	int todo_size = block_size;
+	/* TODO maybe static this to avoid allocations */
+	fixture **todo = malloc(todo_size * sizeof(fixture*));
+	int head = 0;
+
+	int list_size = block_size;
+	*list = malloc(list_size * sizeof(fixture*));
+	*nfixtures = 0;
+
+	(*list)[(*nfixtures)++] = fix;
+
+	fixture *f = fix, *k;
+	while(head >= 0) {
+		/*make sure there's enough space for the kids in todo stack*/
+		while(head + f->nkids >= todo_size) {
+			todo_size += block_size;
+			todo = realloc(todo, todo_size * sizeof(fixture*));
+		}
+		/*make sure there's enough space for the kids in the output list*/
+		while((*nfixtures) + f->nkids >= list_size) {
+			list_size += block_size;
+			*list = realloc(*list, list_size * sizeof(fixture*));
+		}
+		/*add the kids to todo and the output list*/
+		for(int i = 0; i < f->nkids; i++) {
+			k = f->kids[i];
+			printf("%p -> %p\n", f, k);
+			todo[head++] = k;
+			(*list)[(*nfixtures)++] = k;
+		}
+		head -= 1; // point to the last child
+		/*pop the last child and process its children in the next iteration*/
+		f = todo[head];
+	}
+	free(todo);
+}
+
+void frender(fixture *fix) {
+	fixture **fs = NULL;
+	int nfs = 0;
+	fcollect(fix, &nfs, &fs);
+
+	for(int i = 0; i < nfs; i++) printf("%p\n", fs[i]);
+}
 void fixture_show(fixture *f) {
 }

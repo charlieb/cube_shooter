@@ -133,7 +133,6 @@ cubes.fixture_add_child(fs[3], fs[5])
 cubes.fixture_add_child(fs[3], fs[6])
 cubes.fixture_add_child(fs[3], fs[7])
 
-cubes.fixture_add_child(fs[6], fs[7])
 cubes.fixture_add_child(fs[6], fs[8])
 cubes.fixture_add_child(fs[6], fs[9])
 cubes.fixture_add_child(fs[8], fs[10])

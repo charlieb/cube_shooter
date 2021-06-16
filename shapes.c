@@ -84,7 +84,7 @@ void frender(fixture *fix) {
 		}
 		head += f->nkids -1; // point to the last child
 		/*pop the last child and process its children in the next iteration*/
-		f = todo[head--];
+		f = todo[head];
 	}
 	free(todo);
 }

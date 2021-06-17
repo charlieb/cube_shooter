@@ -47,6 +47,10 @@ void fpush(fixture *f, fixture *kid) {
 	f->kids[f->nkids] = kid;
 	f->nkids++;
 }
+
+void fmspush(fixture *f, mat m) {
+	mspush(&f->ms, m);
+}
 /*
 typedef struct sfixture {
 	mat m;
@@ -58,39 +62,6 @@ typedef struct sfixture {
 	struct sfixture **kids;
 } fixture;
 */
-
-void fcalcm(fixture *fix) {
-	const int todo_block_size = 10;
-	int todo_size = todo_block_size;
-	/* TODO maybe static this to avoid allocations */
-	fixture **todo = malloc(todo_size * sizeof(fixture*));
-	int head = 0;
-
-	mscalc(&fix->ms, fix->m);
-	fixture *f = fix, *k;
-	mat tmp;
-
-	while(head >= 0) {
-		/*make sure there's enough space for the kids*/
-		while(head + f->nkids >= todo_size) {
-			todo_size += todo_block_size;
-			todo = realloc(todo, todo_size * sizeof(fixture*));
-		}
-		/*add the kids and calc them at the same time*/
-		for(int i = 0; i < f->nkids; i++) {
-			k = f->kids[i];
-			mscalc(&k->ms, k->m);
-			mmul(f->m, k->m, tmp); // may need to reverse this
-			memcpy(k->m, tmp, sizeof(mat));
-
-			todo[head+i] = k;
-		}
-		head += f->nkids -1; // point to the last child
-		/*pop the last child and process its children in the next iteration*/
-		f = todo[head];
-	}
-	free(todo);
-}
 
 /* gives back a list where items earlier in the list are 
  * gaurenteed to be closer to the root node of the tree.
@@ -106,13 +77,18 @@ static void fcollect(fixture *fix, int *nfixtures, fixture ***list) {
 	int head = 0;
 
 	int list_size = block_size;
-	*list = malloc(list_size * sizeof(fixture*));
+	if(*list == NULL) // alloc a new fixture list
+		*list = malloc(list_size * sizeof(fixture*));
+	 else //reuse a previously allocated list
+		list_size = *nfixtures;
 	*nfixtures = 0;
 
 	(*list)[(*nfixtures)++] = fix;
+	todo[head] = fix;
 
 	fixture *f = fix, *k;
 	while(head >= 0) {
+		f = todo[head];
 		/*make sure there's enough space for the kids in todo stack*/
 		while(head + f->nkids >= todo_size) {
 			todo_size += block_size;
@@ -126,23 +102,36 @@ static void fcollect(fixture *fix, int *nfixtures, fixture ***list) {
 		/*add the kids to todo and the output list*/
 		for(int i = 0; i < f->nkids; i++) {
 			k = f->kids[i];
-			printf("%p -> %p\n", f, k);
+			//printf("%p -> %p\n", f, k); fflush(NULL);
 			todo[head++] = k;
 			(*list)[(*nfixtures)++] = k;
 		}
 		head -= 1; // point to the last child
 		/*pop the last child and process its children in the next iteration*/
-		f = todo[head];
 	}
 	free(todo);
 }
 
 void frender(fixture *fix) {
-	fixture **fs = NULL;
-	int nfs = 0;
+	static fixture **fs = NULL;
+	static int nfs = 0;
 	fcollect(fix, &nfs, &fs);
 
-	for(int i = 0; i < nfs; i++) printf("%p\n", fs[i]);
+	mat tmp;
+	//for(int i = 0; i < nfs; i++) printf("%p\n", fs[i]);
+	for(int i = 0; i < nfs; i++) {
+		mscalc(&fs[i]->ms, tmp);
+		if(fs[i]->parent)
+			mmul(fs[i]->parent->m, tmp, fs[i]->m); // may need to reverse this
+		else
+			memcpy(fs[i]->m, tmp, sizeof(mat));
+	}
+	for(int i = 0; i < nfs; i++) {
+		//msprint(&fs[i]->ms);
+		printf("%i ---------------- %i\n", i, i);
+		mprint(fs[i]->m);
+	}
 }
+
 void fixture_show(fixture *f) {
 }

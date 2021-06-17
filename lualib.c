@@ -54,6 +54,7 @@ static void lua_get_vec(lua_State *L, vec v) {
 	}
 }
 
+/*TODO consider why use a mat* instead of just a mat which is a pointer itself*/
 static int lua_make_id_mat(lua_State *L) {
 	mat *m = malloc(sizeof(mat));
 	mid(*m);
@@ -273,6 +274,13 @@ static int lua_fixture_matstack(lua_State *L) {
 	return 1;
 }
 
+static int lua_fixture_matstack_push(lua_State *L) {
+	mat *m = (mat *)lua_touserdata(L,-1);
+	fixture *f = (fixture *)lua_touserdata(L,-2);
+	fmspush(f, *m);
+	return 0;
+}
+
 static int lua_make_fixture(lua_State *L) {
 	fixture *f = malloc(sizeof(fixture));
 	memset(f, 0, sizeof(fixture));
@@ -328,6 +336,7 @@ static const struct luaL_Reg mylib[] = {
 	{"make_fixture", lua_make_fixture},
 	{"fixture_add_child", lua_fixture_add_child},
 	{"fixture_matstack", lua_fixture_matstack},
+	{"fixture_matstack_push", lua_fixture_matstack_push},
 	{"fixture_set_shape", lua_fixture_set_shape},
 	{"fixture_show", lua_fixture_show},
 

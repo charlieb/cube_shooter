@@ -32,6 +32,7 @@ void print_shape(shape *s);
 void stransform(shape *s, mat m);
 
 void fpush(fixture *f, fixture *kid);
+void fmspush(fixture *f, mat m);
 void frender(fixture *f);
 
 void fixture_show(fixture *f);

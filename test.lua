@@ -118,23 +118,48 @@ function test_show_shape()
 end
 --test_show_shape()
 
+function test_fixtures()
+	fs = {}
+	for i=1,10 do
+		fs[i] = cubes.make_fixture()
+	end
+
+	print "Fixtures Made"
+
+	cubes.fixture_add_child(fs[1], fs[2])
+	cubes.fixture_add_child(fs[1], fs[3])
+	cubes.fixture_add_child(fs[1], fs[4])
+
+	cubes.fixture_add_child(fs[3], fs[5])
+	cubes.fixture_add_child(fs[3], fs[6])
+	cubes.fixture_add_child(fs[3], fs[7])
+
+	cubes.fixture_add_child(fs[6], fs[8])
+	cubes.fixture_add_child(fs[6], fs[9])
+	cubes.fixture_add_child(fs[8], fs[10])
+
+
+	cubes.mat_trans(m, {1,0,0,1})
+	for i=1,10 do
+		cubes.fixture_matstack_push(fs[i], m);
+	end
+	cubes.fixture_show(fs[1])
+end
+
+
 fs = {}
 for i=1,10 do
 	fs[i] = cubes.make_fixture()
 end
 
-print "Fixtures Made"
-
 cubes.fixture_add_child(fs[1], fs[2])
-cubes.fixture_add_child(fs[1], fs[3])
-cubes.fixture_add_child(fs[1], fs[4])
 
-cubes.fixture_add_child(fs[3], fs[5])
-cubes.fixture_add_child(fs[3], fs[6])
-cubes.fixture_add_child(fs[3], fs[7])
+cubes.mat_set_id(m)
+cubes.mat_trans(m, {10,100,1000,1})
+cubes.fixture_matstack_push(fs[1], m);
 
-cubes.fixture_add_child(fs[6], fs[8])
-cubes.fixture_add_child(fs[6], fs[9])
-cubes.fixture_add_child(fs[8], fs[10])
+cubes.mat_set_id(m)
+cubes.mat_rotz(m, 0.5)
+cubes.fixture_matstack_push(fs[2], m);
 
 cubes.fixture_show(fs[1])

@@ -5,6 +5,6 @@
 
 //void draw_shape(shape *s);
 
-int show_shape(shape *s);
+int show_shapes(int nshapes, shape **ss);
 
 #endif

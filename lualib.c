@@ -299,12 +299,16 @@ static int lua_fixture_set_shape(lua_State *L) {
 	shape *s = (shape *)lua_touserdata(L,-1);
 	fixture *f = (fixture *)lua_touserdata(L,-2);
 	f->s = s;
+	s->fixture = f;
 	return 0;
 }
 
 static int lua_fixture_show(lua_State *L) {
 	fixture *f = (fixture *)lua_touserdata(L,-1);
-	frender(f);
+	shape **shapes = NULL;
+	int nshapes = 0;
+	frender(f, &nshapes, &shapes);
+	show_shapes(nshapes, shapes);
 	return 0;
 }
 

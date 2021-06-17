@@ -12,6 +12,12 @@ void stransform(shape *s, mat m) {
 	}
 }
 
+void srender(shape *s) {
+	for(int i = 0; i < s->proto->npts; i++)
+		mvmul(s->fixture->m, s->proto->pts[i], s->pts[i]);
+}
+
+
 void print_shape(shape *s) {
 	printf("Shape: npts: %i, nlines: %i\n", s->npts, s->proto->nlines);
 	for(int i = 0; i < s->npts; i++)
@@ -112,10 +118,13 @@ static void fcollect(fixture *fix, int *nfixtures, fixture ***list) {
 	free(todo);
 }
 
-void frender(fixture *fix) {
+void frender(fixture *fix, int *nshapes, shape ***shapes) {
 	static fixture **fs = NULL;
 	static int nfs = 0;
 	fcollect(fix, &nfs, &fs);
+
+	*shapes = realloc(*shapes, nfs * sizeof(shape*));
+	*nshapes = 0;
 
 	mat tmp;
 	//for(int i = 0; i < nfs; i++) printf("%p\n", fs[i]);
@@ -125,6 +134,11 @@ void frender(fixture *fix) {
 			mmul(fs[i]->parent->m, tmp, fs[i]->m); // may need to reverse this
 		else
 			memcpy(fs[i]->m, tmp, sizeof(mat));
+
+		if(fs[i]->s) {
+			srender(fs[i]->s);
+			(*shapes)[*nshapes++] = fs[i]->s;
+		}
 	}
 	for(int i = 0; i < nfs; i++) {
 		//msprint(&fs[i]->ms);

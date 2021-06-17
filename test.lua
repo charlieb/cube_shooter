@@ -51,8 +51,8 @@ function mat_test()
 	cubes.matstack_print(cms)
 end 
 
+function cube()
 
-function shape_test()
 	local cube = {npts=8; pts={
 		{-0.5,-0.5,-0.5,1},
 		{-0.5, 0.5,-0.5,1},
@@ -79,7 +79,11 @@ function shape_test()
 			3,7,
 			4,8}};
 
-	local cshape = cubes.make_shape(cube);
+	return cubes.make_shape(cube)
+end
+
+function shape_test()
+	cshape = cube()
 	local csms = cubes.shape_matstack(cshape);
 	local s = 100;
 	cubes.mat_set_id(m);
@@ -155,11 +159,18 @@ end
 cubes.fixture_add_child(fs[1], fs[2])
 
 cubes.mat_set_id(m)
-cubes.mat_trans(m, {10,100,1000,1})
+--cubes.mat_trans(m, {10,100,1000,1})
+cubes.mat_scl(m, {100, 100, 100, 1})
 cubes.fixture_matstack_push(fs[1], m);
 
 cubes.mat_set_id(m)
 cubes.mat_rotz(m, 0.5)
 cubes.fixture_matstack_push(fs[2], m);
 
+proto = cube()
+c = cubes.make_shape_from(proto)
+cubes.fixture_set_shape(fs[2], c)
+
 cubes.fixture_show(fs[1])
+
+

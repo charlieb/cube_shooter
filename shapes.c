@@ -137,8 +137,9 @@ void frender(fixture *fix, int *nshapes, shape ***shapes) {
 
 		if(fs[i]->s) {
 			srender(fs[i]->s);
-			(*shapes)[*nshapes++] = fs[i]->s;
+			(*shapes)[(*nshapes)++] = fs[i]->s;
 		}
+		printf("%i\n", *nshapes);
 	}
 	for(int i = 0; i < nfs; i++) {
 		//msprint(&fs[i]->ms);

@@ -212,11 +212,15 @@ void msclear(matstack *ms) {
 	ms->nmats = 0;
 }
 void mscalc(matstack *ms, mat res) {
-	mat tmp[2];
-	mid(tmp[0]); mid(tmp[1]);
-	for(int i = 0; i < ms->nmats; i++)
-		mmul(ms->mats[i], tmp[i%2], tmp[(i+1)%2]);
-	memcpy(res, tmp[(ms->nmats)%2], sizeof(mat));
+	if(ms->nmats > 0) {
+		mat tmp[2];
+		mid(tmp[0]); mid(tmp[1]);
+		for(int i = 0; i < ms->nmats; i++)
+			mmul(ms->mats[i], tmp[i%2], tmp[(i+1)%2]);
+		memcpy(res, tmp[(ms->nmats)%2], sizeof(mat));
+	} else {
+		mid(res);
+	}
 }
 
 void mspeek(matstack *ms, int n, mat m) {

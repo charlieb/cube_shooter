@@ -54,6 +54,7 @@ int show_shapes(int nshapes, shape **ss) {
 		shape *s = NULL;
 		for(int i = 0; i < nshapes; i++) {
 			s = ss[i];
+			print_shape(s);
 			for(int i = 0; i < s->proto->nlines; i++) {
 				float *p1 = s->pts[s->proto->lines[i*2]];
 				float *p2 = s->pts[s->proto->lines[i*2+1]];

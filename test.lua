@@ -157,20 +157,37 @@ for i=1,10 do
 end
 
 cubes.fixture_add_child(fs[1], fs[2])
+cubes.fixture_add_child(fs[2], fs[3])
+cubes.fixture_add_child(fs[3], fs[4])
 
 cubes.mat_set_id(m)
 --cubes.mat_trans(m, {10,100,1000,1})
 cubes.mat_scl(m, {100, 100, 100, 1})
 cubes.fixture_matstack_push(fs[1], m);
+cubes.mat_set_id(m)
+cubes.mat_roty(m, 0.40)
+cubes.fixture_matstack_push(fs[1], m);
 
 cubes.mat_set_id(m)
-cubes.mat_rotz(m, 0.5)
+cubes.mat_rotz(m, 0.2)
 cubes.fixture_matstack_push(fs[2], m);
 
 proto = cube()
-c = cubes.make_shape_from(proto)
-cubes.fixture_set_shape(fs[2], c)
+cubes.fixture_set_shape(fs[2], cubes.make_shape_from(proto))
+cubes.fixture_set_shape(fs[3], cubes.make_shape_from(proto))
+cubes.fixture_set_shape(fs[4], cubes.make_shape_from(proto))
 
-cubes.fixture_show(fs[1])
+cubes.mat_set_id(m)
+cubes.mat_trans(m, {1,0,0,1})
+cubes.mat_rotz(m, 0.2)
+cubes.fixture_matstack_push(fs[3], m);
+cubes.fixture_matstack_push(fs[4], m);
 
+cubes.mat_set_id(m)
+while true do
+	cubes.mat_roty(m, 0.01)
+	cubes.mat_rotz(m, 0.01)
+	cubes.matstack_poke(cubes.fixture_matstack(fs[1]), 1, m)
+	cubes.fixture_show(fs[1])
+end
 

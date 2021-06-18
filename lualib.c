@@ -308,7 +308,7 @@ static int lua_fixture_show(lua_State *L) {
 	shape **shapes = NULL;
 	int nshapes = 0;
 	frender(f, &nshapes, &shapes);
-	printf("Rendered %i shapes\n", nshapes);
+	//printf("Rendered %i shapes\n", nshapes);
 	show_shapes(nshapes, shapes);
 	return 0;
 }

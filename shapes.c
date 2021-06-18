@@ -139,13 +139,14 @@ void frender(fixture *fix, int *nshapes, shape ***shapes) {
 			srender(fs[i]->s);
 			(*shapes)[(*nshapes)++] = fs[i]->s;
 		}
-		printf("%i\n", *nshapes);
 	}
+	/*
 	for(int i = 0; i < nfs; i++) {
 		//msprint(&fs[i]->ms);
 		printf("%i ---------------- %i\n", i, i);
 		mprint(fs[i]->m);
 	}
+	*/
 }
 
 void fixture_show(fixture *f) {

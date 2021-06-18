@@ -33,18 +33,27 @@ int init_window() {
 	return 0;
 }
 
-
-int show_shapes(int nshapes, shape **ss) {
-	if(!renderer) init_window();
-
+int get_key_event(char *k) {
 	if(SDL_PollEvent(&e)) {
-		if(e.type == SDL_QUIT) {
+		switch(e.type) {
+		case SDL_QUIT:
 			SDL_DestroyRenderer(renderer);
 			SDL_DestroyWindow(window);
 			SDL_Quit();
 			return -1;
+		case SDL_KEYDOWN:
+			printf("%c\n", e.key.keysym.sym);
+			*k = e.key.keysym.sym;
+			return 1;
+		default:
+			return 0;
 		}
 	}
+}
+
+int show_shapes(int nshapes, shape **ss) {
+	if(!renderer) init_window();
+
 
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 	SDL_RenderClear(renderer);

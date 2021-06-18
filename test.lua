@@ -82,46 +82,6 @@ function cube()
 	return cubes.make_shape(cube)
 end
 
-function shape_test()
-	cshape = cube()
-	local csms = cubes.shape_matstack(cshape);
-	local s = 100;
-	cubes.mat_set_id(m);
-	cubes.mat_scl(m, {s, s, s, 1});
-	cubes.matstack_push(csms, m);
-
-	cubes.mat_set_id(m);
-	cubes.mat_rotz(m, 0.7);
-	cubes.matstack_push(csms, m);
-
-	local ry = 0
-	cubes.mat_set_id(m);
-	cubes.mat_roty(m, ry);
-	cubes.matstack_push(csms, m);
-	--cubes.mat_print(m);
-end
-function test_show_shape()
-	local si = -1;
-	local quit = false
-	while not quit do
-		ry = ry + 0.01;
-		cubes.mat_set_id(m);
-		cubes.mat_roty(m, ry);
-		cubes.matstack_poke(csms, 2, m);
-
-		if s > 100 or s < 20 then
-			si = -si;
-		end 
-		s = s + si;
-		cubes.mat_set_id(m);
-		cubes.mat_scl(m, {s,s,s,1});
-		cubes.matstack_poke(csms, 0, m);
-
-		quit = cubes.show_shape(cshape)
-	end 
-end
---test_show_shape()
-
 function test_fixtures()
 	fs = {}
 	for i=1,10 do
